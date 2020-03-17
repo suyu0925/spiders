@@ -1,15 +1,14 @@
-import { ProductDoc } from '@global/interfaces/product.interface'
 import { SourceEnum, Subject, SubjectDoc } from '@global/interfaces/subject.interface'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import * as Crawler from 'crawler'
 import * as moment from 'moment'
 import { Model } from 'mongoose'
+import * as fs from 'fs'
 
 @Injectable()
 export class AppService {
   constructor(
-    @InjectModel('product') private readonly productModel: Model<ProductDoc>,
     @InjectModel('subject') private readonly subjectModel: Model<SubjectDoc>,
   ) { }
 
@@ -28,16 +27,33 @@ export class AppService {
     return isOverlap
   }
 
-  async crawlPage(page?: number) {
-    // TODO:
+  async updateSubjectMagnet(title: string, magnet: string) {
+    await this.subjectModel.updateOne({ title }, { $set: { magnet } })
   }
 
-  async crawl() {
+  getMaxPageNumber($: any) {
+    const lis = $('.page-navigator>li')
+    const length = lis.get().length
+    let $lastList = $(lis.get(length - 1))
+    this.logger.log(`lastList ${$lastList.toString()}`)
+    this.logger.log(`$lastList.children('a').text() ${$lastList.children('a').text()}`)
+    if ($lastList.children('a').text() === '下一页') {
+      $lastList = $lastList.prev()
+    }
+    return parseInt($lastList.children('a').text(), 10)
+  }
+
+  async crawlPage(page: number = 1) {
     return new Promise((resolve, reject) => {
       const c = new Crawler({
         maxConnections: 10,
         // This will be called for each crawled page
-        callback: (error: Error, res: any, done: () => void) => {
+        callback: (error: Error, res: any, done2: () => void) => {
+          const done = () => {
+            this.logger.log(`crawl page ${page} done`)
+            done2()
+          }
+
           if (error) {
             this.logger.error(error)
             done()
@@ -58,6 +74,7 @@ export class AppService {
                 title: $article.find('header>h2>a').text(),
                 updateTime: moment($article.find('time').text().trim()).toDate(),
                 source: SourceEnum.sshs,
+                magnet: null,
               }
               // this.logger.log(`${JSON.stringify(subject)}`)
               pageDate = subject.updateTime
@@ -69,10 +86,20 @@ export class AppService {
             //   c.queue('https://www.sshs.xyz/tag/%E9%87%8C%E7%95%AA/2/')
             // }
 
+            const maxPage = this.getMaxPageNumber($)
+            this.logger.log(`maxPage: ${maxPage}`)
+            if (page === maxPage) {
+              done()
+              return
+            }
+
             this.saveSubjects(subjects).then((isOverlap) => {
               this.logger.log(`isOverlap ${isOverlap}`)
+              // isOverlap = true
               if (!isOverlap) {
-                done()
+                this.crawlPage(page + 1).then(() => {
+                  done()
+                })
               } else {
                 done()
               }
@@ -81,7 +108,9 @@ export class AppService {
         }
       })
 
-      c.queue('https://www.sshs.xyz/tag/%E9%87%8C%E7%95%AA/')
+      // const html = fs.readFileSync(`${__dirname}/../sshs.html`)
+      // c.queue({ html })
+      c.queue(`https://www.sshs.xyz/tag/%E9%87%8C%E7%95%AA/${page === 1 ? '' : page}`)
 
       c.on('drain', () => {
         // all task done
@@ -89,5 +118,67 @@ export class AppService {
         resolve()
       })
     })
+  }
+
+  async crawlProducts() {
+    const subjects = await this.subjectModel.find({ magnet: null })
+
+    return new Promise((resolve, reject) => {
+      const c = new Crawler({
+        // rateLimit: 1000, // `maxConnections` will be forced to 1 and between two tasks, minimum time gap is 1000 (ms)
+        maxConnections: 10,
+        callback: (error: Error, res: any, done2: () => void) => {
+          const done = () => {
+            this.logger.log(`crawl subject ${res.options.title} done`)
+            done2()
+          }
+
+          const $ = res.$
+
+          const items = $('.dl-item')
+          let magnet = 'no'
+          for (let i = 0; i < items.get().length; i++) {
+            const $item = $(items.get(i))
+            // this.logger.log(`$item.toString() ${$item.toString()}`)
+            // this.logger.log(`$item.text() ${$item.text()}`)
+            // this.logger.log(`$item.children('a').attr('href') ${$item.children('a').attr('href')}`)
+            if ($item.text().trim() === '磁力') {
+              magnet = $item.children('a').attr('href')
+            }
+          }
+          // this.logger.log(`magnet ${magnet}`)
+
+          this.updateSubjectMagnet(res.options.title, magnet).then(() => {
+            done()
+          })
+        },
+      })
+
+      for (const subject of subjects) {
+        c.queue({ uri: subject.href, title: subject.title })
+      }
+      // const html = fs.readFileSync(`${__dirname}/../sshs_detail.html`)
+      // c.queue({ html, title: '123' })
+
+      c.on('drain', () => {
+        // all task done
+        this.logger.log('all products done')
+        resolve()
+      })
+    })
+  }
+
+  async crawl() {
+    await this.crawlPage()
+
+    await this.crawlProducts()
+  }
+
+  async getMagnet(start: string) {
+    const subjects = this.subjectModel.find({
+      ...start ? { updateTime: { $gt: moment(start).toDate() } } : {},
+      magnet: { $ne: null }
+    }, { magnet: 1, updateTime: 1, title: 1 }).sort({ updateTime: 1 }).limit(50)
+    return subjects
   }
 }

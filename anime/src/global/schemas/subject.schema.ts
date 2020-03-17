@@ -6,4 +6,5 @@ export const SubjectSchema = new Schema({
   href: String, // 详情网址
   updateTime: Date, // 更新时间
   source: String, // 源
+  magnet: String, // 磁力链接
 })

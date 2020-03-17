@@ -1,4 +1,3 @@
-import { ProductSchema } from '@global/schemas/product.schema'
 import { SubjectSchema } from '@global/schemas/subject.schema'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
@@ -14,7 +13,6 @@ import configuration from './config/configuration'
       load: [configuration],
     }),
     MongooseModule.forRoot('mongodb://localhost/anime'),
-    MongooseModule.forFeature([{ name: 'product', schema: ProductSchema, collection: 'products' }]),
     MongooseModule.forFeature([{ name: 'subject', schema: SubjectSchema, collection: 'subjects' }]),
   ],
   controllers: [AppController],

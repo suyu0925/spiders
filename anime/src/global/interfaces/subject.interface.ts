@@ -10,6 +10,7 @@ export interface Subject {
   href: string, // 详情网址
   updateTime: Date, // 更新时间
   source: SourceEnum, // 源
+  magnet: string, // 磁力链接
 }
 
 export interface SubjectDoc extends Subject, Document {
