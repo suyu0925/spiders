@@ -3,8 +3,52 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "dev": "npm run start:dev",
+    "format": "tslint --fix -p tsconfig.json -c tslint.json",
+    "start": "npm run start:prod",
+    "start:node": "ts-node -r tsconfig-paths/register src/main.ts",
+    "start:dev": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/main.js\"",
+    "start:debug": "tsc-watch -p tsconfig.build.json --onSuccess \"node --inspect-brk dist/main.js\"",
+    "start:prod": "npm run build && pm2 startOrReload pm2.config.js",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "fix": "ts-node -r tsconfig-paths/register src/fix/index.ts"
+  },
   "dependencies": {
+    "@nestjs/common": "^7.0.2",
+    "@nestjs/config": "^0.4.0",
+    "@nestjs/core": "^7.0.2",
+    "@nestjs/mongoose": "^6.4.0",
+    "@nestjs/platform-express": "^7.0.2",
     "crawler": "^1.2.1",
-    "moment": "^2.24.0"
+    "module-alias": "^2.2.2",
+    "moment": "^2.24.0",
+    "mongoose": "^5.9.5",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.5.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.3",
+    "@types/jest": "^25.1.4",
+    "@types/mongoose": "^5.7.6",
+    "@types/node": "^13.9.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.1",
+    "ts-node": "^8.6.2",
+    "tsc-watch": "^4.2.3",
+    "tsconfig-paths": "^3.9.0",
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3"
+  },
+  "_moduleAliases": {
+    "@src": "dist/",
+    "@global": "dist/global",
+    "@utils": "dist/utils"
   }
 }
