@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose'
 import * as Crawler from 'crawler'
 import * as moment from 'moment'
 import { Model } from 'mongoose'
-import * as fs from 'fs'
 
 @Injectable()
 export class AppService {
@@ -110,7 +109,8 @@ export class AppService {
 
       // const html = fs.readFileSync(`${__dirname}/../sshs.html`)
       // c.queue({ html })
-      c.queue(`https://www.sshs.xyz/tag/%E9%87%8C%E7%95%AA/${page === 1 ? '' : page}`)
+      // c.queue(`https://www.sshs.xyz/tag/%E9%87%8C%E7%95%AA/${page === 1 ? '' : page}`)
+      c.queue(`https://www.sshs.xyz/category/anime.html/${page}/`)
 
       c.on('drain', () => {
         // all task done
@@ -122,8 +122,15 @@ export class AppService {
 
   async crawlProducts() {
     const subjects = await this.subjectModel.find({ magnet: null })
+    this.logger.log(`there are ${subjects.length} subjects waitting to crawl`)
 
     return new Promise((resolve, reject) => {
+      if (subjects.length === 0) {
+        this.logger.log('no new, done')
+        resolve()
+        return
+      }
+
       const c = new Crawler({
         // rateLimit: 1000, // `maxConnections` will be forced to 1 and between two tasks, minimum time gap is 1000 (ms)
         maxConnections: 10,
@@ -155,6 +162,7 @@ export class AppService {
       })
 
       for (const subject of subjects) {
+        this.logger.log(`queue title ${subject.title}, uri: ${subject.href}`)
         c.queue({ uri: subject.href, title: subject.title })
       }
       // const html = fs.readFileSync(`${__dirname}/../sshs_detail.html`)
