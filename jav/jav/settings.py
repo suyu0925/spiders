@@ -12,6 +12,7 @@ BOT_NAME = 'jav'
 SPIDER_MODULES = ['jav.spiders']
 NEWSPIDER_MODULE = 'jav.spiders'
 
+LOG_LEVEL = 'ERROR'  # to only display errors
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'jav (+http://www.yourdomain.com)'

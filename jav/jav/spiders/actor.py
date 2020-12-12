@@ -5,8 +5,8 @@ import sqlite3
 
 
 class ActorSpider(scrapy.Spider):
-    url = 'https://javdb.com/actors'
     name = "actor"
+    url = 'https://javdb.com/actors'
     page = 1
     cat = None
     conn = sqlite3.connect('jav.db')
@@ -29,7 +29,7 @@ class ActorSpider(scrapy.Spider):
         yield from self.crawl()
 
     def parse(self, response):
-        logger.info(f'parse page {self.page}')
+        logger.info(f'parse actor page {self.page}')
         if False:
             filename = f'actors_{self.page}.html'
             with open(filename, 'wb') as f:
