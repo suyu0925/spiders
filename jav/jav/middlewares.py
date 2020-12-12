@@ -78,6 +78,7 @@ class JavDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+        request.cookies['locale'] = 'zh'
         return None
 
     def process_response(self, request, response, spider):
