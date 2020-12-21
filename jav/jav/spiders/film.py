@@ -19,14 +19,14 @@ class FilmSpider(scrapy.Spider):
 
     def start_requests(self):
         if self.actor_like is None:
-            logger.warn('you should specify a actor')
+            logger.warning('you should specify a actor')
             return []
 
         c = self.conn.cursor()
-        c.execute(f"SELECT * FROM actors WHERE alias LIKE '{self.actor_like}'")
+        c.execute(f"SELECT * FROM actors WHERE alias LIKE '%{self.actor_like}%'")
         self.actor = c.fetchone()
         if self.actor is None:
-            logger.warn(f'there is no actor name {self.actor_like}')
+            logger.warning(f'there is no actor name {self.actor_like}')
             return []
 
         yield from self.crawl()
