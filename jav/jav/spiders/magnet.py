@@ -13,7 +13,7 @@ class MagnetSpider(scrapy.Spider):
     conn = sqlite3.connect('jav.db')
 
     def __init__(self, actor=None, **kwargs):
-        self.actor_like = actor
+        self.actor_like = actor.strip().replace("'", '')
         super().__init__(**kwargs)
 
     def crawl(self):

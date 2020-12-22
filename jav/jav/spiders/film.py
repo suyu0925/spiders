@@ -11,7 +11,7 @@ class FilmSpider(scrapy.Spider):
     conn = sqlite3.connect('jav.db')
 
     def __init__(self, actor=None, **kwargs):
-        self.actor_like = actor
+        self.actor_like = actor.strip().replace("'", '')
         super().__init__(**kwargs)
 
     def crawl(self):
@@ -23,7 +23,8 @@ class FilmSpider(scrapy.Spider):
             return []
 
         c = self.conn.cursor()
-        c.execute(f"SELECT * FROM actors WHERE alias LIKE '%{self.actor_like}%'")
+        sql_query = f"SELECT * FROM actors WHERE alias LIKE '%{self.actor_like}%'"
+        c.execute(sql_query)
         self.actor = c.fetchone()
         if self.actor is None:
             logger.warning(f'there is no actor name {self.actor_like}')
