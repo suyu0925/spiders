@@ -17,8 +17,8 @@ if __name__ == '__main__':
         logger.warning(f'there is not actor {actor_arg}')
     logger.info(f'actor: {actor}')
 
-    data_clause = f'AND date > {date_arg}' if date_arg else ''
-    c.execute(f"SELECT uid FROM films WHERE actor LIKE '%{actor[0]}%' {data_clause} ORDER BY date DESC")
+    date_clause = f'AND date > {date_arg}' if date_arg else ''
+    c.execute(f"SELECT uid FROM films WHERE actor LIKE '%{actor[0]}%' {date_clause} ORDER BY date DESC")
     films = c.fetchall()
     logger.info(f'films: {films}')
 
