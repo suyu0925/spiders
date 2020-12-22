@@ -11,14 +11,16 @@ if __name__ == '__main__':
 
     conn = sqlite3.connect('jav.db')
     c = conn.cursor()
-    c.execute(f"SELECT * FROM actors WHERE alias LIKE '%{actor_arg}%'")
+    c.execute(f"SELECT alias FROM actors WHERE alias LIKE '%{actor_arg}%'")
     actor = c.fetchone()
     if actor is None:
         logger.warning(f'there is not actor {actor_arg}')
     logger.info(f'actor: {actor}')
 
+    actor_clause = ' OR '.join([f"actor LIKE '%{x}%'" for x in actor[0].split(',')])
     date_clause = f'AND date > {date_arg}' if date_arg else ''
-    c.execute(f"SELECT uid FROM films WHERE actor LIKE '%{actor[0]}%' {date_clause} ORDER BY date DESC")
+    sql_query = f"SELECT uid FROM films WHERE ({actor_clause}) {date_clause} ORDER BY date DESC"
+    c.execute(sql_query)
     films = c.fetchall()
     logger.info(f'films: {films}')
 
