@@ -79,7 +79,7 @@ class FilmSpider(scrapy.Spider):
             c.execute(sql)
             film = c.fetchone()
             if not film is None:
-                logger.info(f'film({self.actor[0]}, {uids[-1]}) has crawled, done job')
+                logger.info(f'film({self.actor[0]}, {uids[-1]}) has crawled, {film} done job')
                 return
         except Exception as e:
             logger.error(f'crawl film raise {e}')
