@@ -49,6 +49,9 @@ class MagnetSpider(scrapy.Spider):
     def parse(self, response):
         uid = response.meta['uid']
         logger.info(f'parse magnet {uid}')
+        if uid.upper().startswith('FC2'):
+            logger.info('skip FC2')
+            return
         if False:
             filename = f'magnet_{uid}.html'
             with open(filename, 'wb') as f:
