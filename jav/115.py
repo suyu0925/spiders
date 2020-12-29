@@ -30,7 +30,7 @@ if __name__ == '__main__':
         actor_clause = ' OR '.join(
             [f"actor LIKE '%{x}%'" for x in actor[0].split(',')])
         date_clause = f'AND date > {date_arg}' if date_arg else ''
-        sql_query = f"SELECT uid FROM films WHERE ({actor_clause}) {date_clause} ORDER BY date DESC"
+        sql_query = f"SELECT uid FROM films WHERE ({actor_clause}) {date_clause} ORDER BY date"
         c.execute(sql_query)
         films = c.fetchall()
     logger.info(f'films: {films}')
@@ -40,8 +40,8 @@ if __name__ == '__main__':
         tags_priority = [
             '高清,字幕,優',
             '高清,字幕',
-            '高清',
-            ''
+            # '高清',
+            # ''
         ]
         magnet = None
         for tags in tags_priority:
