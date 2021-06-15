@@ -1,7 +1,9 @@
 module HaveFun
 
+open System
 open System.Threading
 open System.Threading.Tasks
+open System.Collections.Generic
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Logging
@@ -15,13 +17,14 @@ open DotnetSpider.Infrastructure
 open DotnetSpider.Scheduler
 open DotnetSpider.Scheduler.Component
 open Serilog
+open DotnetSpider.Proxy
 
 type Parser() =
     inherit DataParser()
 
     override this.InitializeAsync() : Task =
         this.AddRequiredValidator("cnblogs\\.com")
-        this.AddFollowRequestQuerier(Selectors.XPath("."))
+        // this.AddFollowRequestQuerier(Selectors.XPath("."))
         Task.CompletedTask
 
     override this.ParseAsync(context: DataFlowContext) : Task =
@@ -41,7 +44,15 @@ type CnblogSpider(options: IOptions<SpiderOptions>, services: DependenceServices
         this.AddDataFlow(new ConsoleStorage()) |> ignore
 
     member this.addRequest() =
-        this.AddRequestsAsync(new Request("http://www.cnblogs.com/"))
+        let properties =
+            Dictionary<string, obj>(
+                dict [
+                    "Timeout", 10000 :> obj
+                    "网站", "博客园" :> obj
+                ]
+            )
+
+        this.AddRequestsAsync(new Request("http://www.cnblogs.com/", properties))
         |> Async.AwaitTask
 
     override this.InitializeAsync(stoppingToken) : Task =
@@ -55,12 +66,20 @@ type CnblogSpider(options: IOptions<SpiderOptions>, services: DependenceServices
     override this.GenerateSpiderId() : SpiderId =
         SpiderId(ObjectId.CreateId().ToString(), "博客园")
 
+type ClashProxySuplier() =
+    interface IProxySupplier with
+        member this.GetProxiesAsync() : Task<IEnumerable<Uri>> =
+            Task.FromResult(seq [ Uri("http://localhost:7890") ])
+
 let RunCnblogSpider () =
-    Builder
-        .CreateDefaultBuilder<CnblogSpider>(fun x -> x.Speed <- 5.0)
+    let builder = Builder.CreateDefaultBuilder<CnblogSpider>(fun x -> x.Speed <- 5.0)
+
+    builder
         // .UseSerilog()
         .UseDownloader<HttpClientDownloader>()
         .UseQueueDistinctBfsScheduler<HashSetDuplicateRemover>()
+        .UseProxy<ClashProxySuplier, DefaultProxyValidator>(fun _ -> ())
+        .IgnoreServerCertificateError()
         .Build()
         .RunAsync()
     |> Async.AwaitTask
