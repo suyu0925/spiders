@@ -8,7 +8,7 @@ RUN dotnet tool restore
 RUN dotnet paket restore
 
 # build
-RUN dotnet publish -c Release -o out App
+RUN dotnet publish -c Release -o App/out App
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:3.1
