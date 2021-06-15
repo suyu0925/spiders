@@ -1,0 +1,11 @@
+source https://api.nuget.org/v3/index.json
+
+storage: none
+framework: netcoreapp3.1
+
+nuget FSharp.Core
+nuget DotnetSpider 5.0.8
+nuget Serilog.AspNetCore 3.4.0
+nuget Serilog.Sinks.Console 3.1.1
+nuget Serilog.Sinks.RollingFile 3.3.0
+nuget Serilog.Sinks.PeriodicBatching 2.3.0
