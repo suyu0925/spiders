@@ -4,6 +4,6 @@ open System
 
 [<EntryPoint>]
 let main argv =
-    HaveFun.RunCnblogSpider() |> Async.RunSynchronously
+    HaveFun.CnblogSpider.Run() |> Async.RunSynchronously
 
     0 // return an integer exit code

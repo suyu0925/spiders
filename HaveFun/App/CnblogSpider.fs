@@ -1,4 +1,4 @@
-module HaveFun
+namespace HaveFun
 
 open System
 open System.Threading
@@ -71,15 +71,16 @@ type ClashProxySuplier() =
         member this.GetProxiesAsync() : Task<IEnumerable<Uri>> =
             Task.FromResult(seq [ Uri("http://localhost:7890") ])
 
-let RunCnblogSpider () =
-    let builder = Builder.CreateDefaultBuilder<CnblogSpider>(fun x -> x.Speed <- 5.0)
+module CnblogSpider =
+    let Run () =
+        let builder = Builder.CreateDefaultBuilder<CnblogSpider>(fun x -> x.Speed <- 5.0)
 
-    builder
-        // .UseSerilog()
-        .UseDownloader<HttpClientDownloader>()
-        .UseQueueDistinctBfsScheduler<HashSetDuplicateRemover>()
-        .UseProxy<ClashProxySuplier, DefaultProxyValidator>(fun _ -> ())
-        .IgnoreServerCertificateError()
-        .Build()
-        .RunAsync()
-    |> Async.AwaitTask
+        builder
+            // .UseSerilog()
+            .UseDownloader<HttpClientDownloader>()
+            .UseQueueDistinctBfsScheduler<HashSetDuplicateRemover>()
+            .UseProxy<ClashProxySuplier, DefaultProxyValidator>(fun _ -> ())
+            .IgnoreServerCertificateError()
+            .Build()
+            .RunAsync()
+        |> Async.AwaitTask

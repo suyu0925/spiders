@@ -43,7 +43,7 @@ export class AppService {
   }
 
   async crawlPage(page: number = 1) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       const c = new Crawler({
         maxConnections: 10,
         // This will be called for each crawled page
@@ -124,7 +124,7 @@ export class AppService {
     const subjects = await this.subjectModel.find({ magnet: null })
     this.logger.log(`there are ${subjects.length} subjects waitting to crawl`)
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (subjects.length === 0) {
         this.logger.log('no new, done')
         resolve()
