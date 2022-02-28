@@ -23,6 +23,7 @@ class MonthlyCollectionSpider(scrapy.Spider):
                 update_time=article_selector.xpath(
                     ".//p/time/text()").getall()[1],
                 href=article_selector.xpath(".//header/h2/a/@href").get(),
+                magnet=None
             )
             yield scrapy.Request(article_item['href'], callback=self.parse_article, cb_kwargs=dict(article_item=article_item))
 
