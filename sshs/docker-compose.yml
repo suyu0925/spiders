@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  sshs:
+    network_mode: host
+    container_name: sshs
+    build:
+      context: .
+    image: "sshs:0.0.1"
+    restart: always
