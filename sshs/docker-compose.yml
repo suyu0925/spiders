@@ -2,7 +2,8 @@ version: '3'
 
 services:
   sshs:
-    network_mode: host
+    environment:
+      - MONGO_URI=mongodb://host.docker.internal:27017
     container_name: sshs
     build:
       context: .
