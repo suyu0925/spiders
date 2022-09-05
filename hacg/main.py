@@ -21,7 +21,6 @@ job()
 # set schedule and run pending
 schedule.every().day.at("18:00").do(job)
 
-# print("waiting for next job...")
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
