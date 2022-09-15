@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  hacg:
+    environment:
+      - PG_URI=postgresql://username:your_password@host/jav
+    container_name: jav
+    build:
+      context: .
+    image: "jav:0.0.1"
+    restart: always

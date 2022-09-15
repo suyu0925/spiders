@@ -1,0 +1,5 @@
+scrapy
+schedule
+loguru
+psycopg2-binary
+python-dotenv
