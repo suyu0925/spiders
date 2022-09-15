@@ -2,8 +2,6 @@ version: '3'
 
 services:
   hacg:
-    environment:
-      - PG_URI=postgresql://username:your_password@host/jav
     container_name: jav
     build:
       context: .
