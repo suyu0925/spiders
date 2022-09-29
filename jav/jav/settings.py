@@ -30,3 +30,5 @@ PG_URI = "postgresql://username:password@host/jav" if not "PG_URI" in os.environ
 # Proxy 
 # 默认不使用代理
 # PROXY = 'http://127.0.0.1:7890'
+
+SAVE_HTML = False

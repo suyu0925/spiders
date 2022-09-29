@@ -18,7 +18,7 @@ class ActressSpider(Spider):
         yield Request(url=self.url, callback=self.parse)
 
     def parse(self, response, page=1):
-        if True:
+        if self.settings.getbool("SAVE_HTML"):
             path = "./downloads"
             Path(path).mkdir(parents=True, exist_ok=True)
             filename = f'{path}/actresses-{page}.html'
