@@ -28,7 +28,7 @@ class ActressSpider(Spider):
 
         items_selector = response.xpath(
             "//div[@id='waterfall']/div[@class='item']")
-        for item_selector in items_selector:
+        for index, item_selector in enumerate(items_selector):
             try:
                 # parse names
                 full_name = item_selector.xpath(
@@ -46,6 +46,7 @@ class ActressSpider(Spider):
                     javbus_href=item_selector.xpath(
                         ".//a/@href").get(),
                     uncensored=False,
+                    rank=(page-1)*50+(index+1)
                 )
                 yield actress_item
             except Exception as e:

@@ -42,6 +42,7 @@ class PgsqlPipeline:
                 avatar          text    NOT NULL,
                 javbus_href     text    NOT NULL,
                 uncensored      boolean NOT NULL DEFAULT false,
+                rank            int,
                 CONSTRAINT actress_pk PRIMARY KEY (name)
             );
         """)
@@ -52,19 +53,20 @@ class PgsqlPipeline:
         if isinstance(item, ActressItem):
             cur = self.conn.cursor()
             cur.execute(f"""
-                INSERT INTO actress(name, former_names, chinese_name, avatar, javbus_href)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO actress(name, former_names, chinese_name, avatar, javbus_href, rank)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT
                     ON CONSTRAINT actress_pk
                     DO UPDATE SET
                         former_names = %s,
                         chinese_name = %s,
                         avatar = %s,
-                        javbus_href = %s
+                        javbus_href = %s,
+                        rank = %s
                 ;
             """, (
-                item["name"], item["former_names"], item["chinese_name"], item["avatar"], item["javbus_href"],
-                item["former_names"], item["chinese_name"], item["avatar"], item["javbus_href"],
+                item["name"], item["former_names"], item["chinese_name"], item["avatar"], item["javbus_href"], item["rank"],
+                item["former_names"], item["chinese_name"], item["avatar"], item["javbus_href"], item["rank"]
             ))
             cur.close()
             self.conn.commit()

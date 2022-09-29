@@ -13,3 +13,4 @@ class ActressItem(Item):
     avatar = Field()            # 头像网址
     javbus_href = Field()       # javbus站的演员网址
     uncensored = Field()        # 是否下马
+    rank = Field()              # 排名
