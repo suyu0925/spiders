@@ -7,3 +7,5 @@ services:
       context: .
     image: "jav:0.0.1"
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
