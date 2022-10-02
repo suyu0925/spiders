@@ -9,3 +9,5 @@ services:
       context: .
     image: "hacg:0.0.1"
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
