@@ -12,9 +12,14 @@ def portfolio():
     os.system("scrapy crawl portfolio")
 
 
+def movie():
+    os.system("scrapy crawl movie")
+
+
 def onStartup():
-    actress()
+    # actress()
     portfolio()
+    movie()
 
 
 onStartup()
