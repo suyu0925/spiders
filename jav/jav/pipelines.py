@@ -7,7 +7,7 @@
 from urllib.parse import urlparse
 import psycopg2
 
-from jav.items import ActressItem
+from jav.items import ActressItem, PortfolioItem
 
 
 class PgsqlPipeline:
@@ -45,6 +45,16 @@ class PgsqlPipeline:
                 rank            int,
                 CONSTRAINT actress_pk PRIMARY KEY (name)
             );
+
+            CREATE TABLE IF NOT EXISTS portfolio(
+                actress         text    NOT NULL,
+                avno            text    NOT NULL,
+                name            text    NOT NULL,
+                date            date    NOT NULL,
+                javbus_href     text    NOT NULL,
+                javbus_tags     text[]  NOT NULL DEFAULT '{}',
+                CONSTRAINT portfolio_pk PRIMARY KEY (actress, avno)
+            );            
         """)
         cur.close()
         self.conn.commit()
@@ -70,4 +80,23 @@ class PgsqlPipeline:
             ))
             cur.close()
             self.conn.commit()
+        elif isinstance(item, PortfolioItem):
+            cur = self.conn.cursor()
+            cur.execute(f"""
+                INSERT INTO portfolio(actress, avno, name, date, javbus_href, javbus_tags)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT
+                    ON CONSTRAINT portfolio_pk
+                    DO UPDATE SET
+                        name = %s,
+                        date = %s,
+                        javbus_href = %s,
+                        javbus_tags = %s
+                ;
+            """, (
+                item["actress"], item["avno"], item["name"], item["date"], item["javbus_href"], item["javbus_tags"],
+                item["name"], item["date"], item["javbus_href"], item["javbus_tags"]
+            ))
+            cur.close()
+            self.conn.commit()            
         return item

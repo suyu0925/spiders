@@ -14,3 +14,11 @@ class ActressItem(Item):
     javbus_href = Field()       # javbus站的演员网址
     uncensored = Field()        # 是否下马
     rank = Field()              # 排名
+
+class PortfolioItem(Item):
+    actress = Field()           # 演员
+    avno = Field()              # 番号
+    name = Field()              # 影片名
+    date = Field()              # 日期
+    javbus_href = Field()       # javbus站的影片网址
+    javbus_tags = Field()       # javbus站的影片标签
