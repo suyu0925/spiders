@@ -22,3 +22,16 @@ class PortfolioItem(Item):
     date = Field()              # 日期
     javbus_href = Field()       # javbus站的影片网址
     javbus_tags = Field()       # javbus站的影片标签
+
+class MovieItem(Item):
+    avno = Field()              # 番号
+    date = Field()              # 发行日期
+    footage = Field()           # 片长
+    title = Field()             # 片名
+    director = Field()          # 导演
+    maker = Field()             # 制作商
+    publisher = Field()         # 发行商
+    series = Field()            # 系列
+    actresses = Field()         # 演员表
+    genres = Field()            # 影片类型
+    uncensored = Field()        # 是否无码

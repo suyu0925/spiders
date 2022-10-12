@@ -18,7 +18,7 @@ def movie():
 
 def onStartup():
     # actress()
-    portfolio()
+    # portfolio()
     movie()
 
 

@@ -5,9 +5,10 @@
 
 
 from urllib.parse import urlparse
+
 import psycopg2
 
-from jav.items import ActressItem, PortfolioItem
+from jav.items import ActressItem, MovieItem, PortfolioItem
 
 
 class PgsqlPipeline:
@@ -54,7 +55,22 @@ class PgsqlPipeline:
                 javbus_href     text    NOT NULL,
                 javbus_tags     text[]  NOT NULL DEFAULT '{}',
                 CONSTRAINT portfolio_pk PRIMARY KEY (actress, avno)
-            );            
+            );
+
+            CREATE TABLE IF NOT EXISTS movie(
+                avno            text    NOT NULL,
+                date            date    NOT NULL,
+                footage         text    NOT NULL,
+                title           text    NOT NULL,
+                director        text    NOT NULL,
+                maker           text    NOT NULL,
+                publisher       text    NOT NULL,
+                series          text    NOT NULL,
+                actresses       text[]  NOT NULL,
+                genres          text[]  NOT NULL DEFAULT '{}',
+                uncensored      bool    NOT NULL DEFAULT false,
+                CONSTRAINT movie_pk PRIMARY KEY (avno)
+            );
         """)
         cur.close()
         self.conn.commit()
@@ -98,5 +114,29 @@ class PgsqlPipeline:
                 item["name"], item["date"], item["javbus_href"], item["javbus_tags"]
             ))
             cur.close()
-            self.conn.commit()            
+            self.conn.commit()         
+        elif isinstance(item, MovieItem):
+            cur = self.conn.cursor()
+            cur.execute(f"""
+                INSERT INTO movie(avno, date, footage, title, director, maker, publisher, series, actresses, genres)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT
+                    ON CONSTRAINT movie_pk
+                    DO UPDATE SET
+                        date = %s,
+                        footage = %s,
+                        title = %s,
+                        director = %s,
+                        maker = %s,
+                        publisher = %s,
+                        series = %s,
+                        actresses = %s,
+                        genres = %s,
+                ;
+            """, (
+                item["avno"], item["date"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"],
+                item["date"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"]
+            ))
+            cur.close()
+            self.conn.commit()                   
         return item
