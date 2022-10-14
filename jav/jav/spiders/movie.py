@@ -45,11 +45,11 @@ class MovieSpider(scrapy.Spider):
                 field = field.strip().strip(':')
                 value = value.strip()
                 meta[field] = value
-        # TODO: 演员表
-        _star_show = _info.xpath('.//p[contains(@class, "star-show")]')
+        meta["演员表"] = _info.xpath('.//li/div[contains(@class, "star-name")]/a/text()').getall()
+        meta["类型"] = _info.xpath('//span[contains(@class, "genre")]/label/a/text()').getall()
 
         movie_item = MovieItem(
-            avno=_movie.xpath('.//div[contains(class, "info")]/a/@title').get(),
+            avno=meta["識別碼"],
             date=meta["發行日期"],
             footage=meta["長度"],
             title=_screencap.xpath('.//img/@title').get(),
@@ -58,7 +58,9 @@ class MovieSpider(scrapy.Spider):
             maker=meta["製作商"],
             publisher=meta["發行商"],
             series=meta["系列"],
-            actresses=["三上悠亜"],
-            genres=["DMM獨家", "單體作品", "薄馬賽克", "乳交"],
+            actresses=meta["演员表"],
+            genres=meta["类型"],
+            uncensored=False,
+            javbus_gid=javbus_gid,
         )
         yield movie_item

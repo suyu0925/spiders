@@ -60,6 +60,7 @@ class PgsqlPipeline:
             CREATE TABLE IF NOT EXISTS movie(
                 avno            text    NOT NULL,
                 date            date    NOT NULL,
+                cover           text    NOT NULL,
                 footage         text    NOT NULL,
                 title           text    NOT NULL,
                 director        text    NOT NULL,
@@ -69,6 +70,7 @@ class PgsqlPipeline:
                 actresses       text[]  NOT NULL,
                 genres          text[]  NOT NULL DEFAULT '{}',
                 uncensored      bool    NOT NULL DEFAULT false,
+                javbus_gid      bigint  ,
                 CONSTRAINT movie_pk PRIMARY KEY (avno)
             );
         """)
@@ -118,12 +120,13 @@ class PgsqlPipeline:
         elif isinstance(item, MovieItem):
             cur = self.conn.cursor()
             cur.execute(f"""
-                INSERT INTO movie(avno, date, footage, title, director, maker, publisher, series, actresses, genres)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO movie(avno, date, cover, footage, title, director, maker, publisher, series, actresses, genres, uncensored, javbus_gid)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT
                     ON CONSTRAINT movie_pk
                     DO UPDATE SET
                         date = %s,
+                        cover = %s,
                         footage = %s,
                         title = %s,
                         director = %s,
@@ -132,10 +135,12 @@ class PgsqlPipeline:
                         series = %s,
                         actresses = %s,
                         genres = %s,
+                        uncensored = %s,
+                        javbus_gid = %s
                 ;
             """, (
-                item["avno"], item["date"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"],
-                item["date"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"]
+                item["avno"], item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["javbus_gid"],
+                item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["javbus_gid"]
             ))
             cur.close()
             self.conn.commit()                   

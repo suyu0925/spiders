@@ -26,6 +26,7 @@ class PortfolioItem(Item):
 class MovieItem(Item):
     avno = Field()              # 番号
     date = Field()              # 发行日期
+    cover = Field()             # 封面网址
     footage = Field()           # 片长
     title = Field()             # 片名
     director = Field()          # 导演
@@ -35,3 +36,7 @@ class MovieItem(Item):
     actresses = Field()         # 演员表
     genres = Field()            # 影片类型
     uncensored = Field()        # 是否无码
+    javbus_gid = Field()        # javbus站的磁力链接id
+    # https://www.javbus.com/ajax/uncledatoolsbyajax.php?gid=50951564710&lang=zh&uc=0
+    # Headers:
+    #   Referer https://www.javbus.com
