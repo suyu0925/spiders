@@ -71,6 +71,9 @@ class PortfolioSpider(scrapy.Spider):
                     javbus_href=movie_selector.xpath('@href').get(),
                     javbus_tags=tags,
                 )
+                # fix date
+                if portfolio_item.date == "0000-00-00":
+                    portfolio_item.date = "1900-01-01"
                 yield portfolio_item
             except Exception as e:
                 print(f"parse star throw {e}")
