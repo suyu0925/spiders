@@ -36,7 +36,16 @@ class MovieItem(Item):
     actresses = Field()         # 演员表
     genres = Field()            # 影片类型
     uncensored = Field()        # 是否无码
+    samples = Field()           # 样品图像
     javbus_gid = Field()        # javbus站的磁力链接id
     # https://www.javbus.com/ajax/uncledatoolsbyajax.php?gid=50951564710&lang=zh&uc=0
     # Headers:
     #   Referer https://www.javbus.com
+
+class MagnetItem(Item):
+    avno = Field()              # 番号
+    link = Field()              # 磁力链接
+    title = Field()             # 种子标题
+    size = Field()              # 内容大小
+    date = Field()              # 磁力链接日期
+    tags = Field()              # 标签

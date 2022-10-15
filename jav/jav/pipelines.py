@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import psycopg2
 
-from jav.items import ActressItem, MovieItem, PortfolioItem
+from jav.items import ActressItem, MagnetItem, MovieItem, PortfolioItem
 
 
 class PgsqlPipeline:
@@ -63,15 +63,26 @@ class PgsqlPipeline:
                 cover           text    NOT NULL,
                 footage         text    NOT NULL,
                 title           text    NOT NULL,
-                director        text    NOT NULL,
-                maker           text    NOT NULL,
-                publisher       text    NOT NULL,
-                series          text    NOT NULL,
+                director        text    ,
+                maker           text    ,
+                publisher       text    ,
+                series          text    ,
                 actresses       text[]  NOT NULL,
                 genres          text[]  NOT NULL DEFAULT '{}',
                 uncensored      bool    NOT NULL DEFAULT false,
+                samples         text[]  NOT NULL DEFAULT '{}',
                 javbus_gid      bigint  ,
                 CONSTRAINT movie_pk PRIMARY KEY (avno)
+            );
+
+            CREATE TABLE IF NOT EXISTS magnet(
+                avno            text    NOT NULL,
+                link            text    NOT NULL,
+                title           text    NOT NULL,
+                size            text    NOT NULL,
+                date            date    NOT NULL,
+                tags            text[]  NOT NULL DEFAULT '{}',
+                CONSTRAINT magnet_pk PRIMARY KEY (avno, link)
             );
         """)
         cur.close()
@@ -115,8 +126,8 @@ class PgsqlPipeline:
                 ))
             elif isinstance(item, MovieItem):
                 cur.execute(f"""
-                    INSERT INTO movie(avno, date, cover, footage, title, director, maker, publisher, series, actresses, genres, uncensored, javbus_gid)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO movie(avno, date, cover, footage, title, director, maker, publisher, series, actresses, genres, uncensored, samples, javbus_gid)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT
                         ON CONSTRAINT movie_pk
                         DO UPDATE SET
@@ -131,12 +142,29 @@ class PgsqlPipeline:
                             actresses = %s,
                             genres = %s,
                             uncensored = %s,
+                            samples = %s,
                             javbus_gid = %s
                     ;
                 """, (
-                    item["avno"], item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["javbus_gid"],
-                    item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["javbus_gid"]
+                    item["avno"], item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["samples"], item["javbus_gid"],
+                    item["date"], item["cover"], item["footage"], item["title"], item["director"], item["maker"], item["publisher"], item["series"], item["actresses"], item["genres"], item["uncensored"], item["samples"], item["javbus_gid"]
                 ))
+            elif isinstance(item, MagnetItem):
+                cur.execute(f"""
+                    INSERT INTO magnet(avno, link, title, size, date, tags)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT
+                        ON CONSTRAINT magnet_pk
+                        DO UPDATE SET
+                            title = %s,
+                            size = %s,
+                            date = %s,
+                            tags = %s
+                    ;
+                """, (
+                    item["avno"], item["link"], item["title"], item["size"], item["date"], item["tags"],
+                    item["title"], item["size"], item["date"], item["tags"]
+                ))                
         except psycopg2.Error as e:
             print(f"psycopg2 raise error {e}")
             self.conn.rollback()

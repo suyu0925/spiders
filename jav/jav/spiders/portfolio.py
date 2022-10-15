@@ -9,6 +9,9 @@ from jav.items import PortfolioItem
 
 
 class PortfolioSpider(scrapy.Spider):
+    """
+    默认爬取排名前50的女优的作品集
+    """
     name = 'portfolio'
 
     def __init__(self, head=50, *args, **kwargs):

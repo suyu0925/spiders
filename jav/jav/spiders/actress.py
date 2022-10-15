@@ -8,6 +8,9 @@ from scrapy import Request, Spider
 
 
 class ActressSpider(Spider):
+    """
+    爬取所有的有码女优
+    """
     name = "actress"
     url = "https://www.javbus.com/actresses"
 
@@ -57,6 +60,3 @@ class ActressSpider(Spider):
         print("next_page_href", next_page_href)
         if next_page_href is not None:
             yield Request(url=urljoin(response.url, next_page_href), callback=self.parse, cb_kwargs=dict(page=page + 1))
-
-    def parse_actress(self, response):
-        pass
