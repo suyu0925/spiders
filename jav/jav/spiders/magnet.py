@@ -79,4 +79,7 @@ class MagnetSpider(scrapy.Spider):
                 date =  _magnet.xpath('./td[3]/a/text()').get().strip(),
                 tags = [x.strip() for x in texts[1:]],
             )
+            # fix date
+            if magnet_item['date'] == "0000-00-00":
+                magnet_item['date'] = "1900-01-01"            
             yield magnet_item
