@@ -9,7 +9,7 @@ from scrapy import Selector
 
 class MovieSpider(scrapy.Spider):
     """
-    默认爬取排名前10的女优的全部影片
+    默认爬取排名前50的女优的全部影片
     """
     name = 'movie'
     url = "https://www.javbus.com/"
