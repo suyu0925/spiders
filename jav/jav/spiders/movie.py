@@ -40,7 +40,7 @@ class MovieSpider(scrapy.Spider):
             SELECT avno FROM portfolio, (
                 SELECT name FROM actress
                 ORDER BY rank ASC
-                LIMIT 10
+                LIMIT %s
             ) as actress
             WHERE
                 portfolio.actress = actress.name
