@@ -69,10 +69,13 @@ if __name__ == '__main__':
                 c.execute(f"""
                     SELECT link FROM magnet
                     WHERE avno = %s AND tags @> %s
+                    ORDER BY date
+                    LIMIT 1
                 """, [avno, tag.split(',')])
                 row = c.fetchone()
                 if row:
                     magnets.append(row[0])
+                    break
         c.close()
 
     with open('output.txt', 'w', encoding="utf-8") as f:
