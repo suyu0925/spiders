@@ -14,8 +14,9 @@ class MovieSpider(scrapy.Spider):
     name = 'movie'
     url = "https://www.javbus.com/"
 
-    def __init__(self, head=50, *args, **kwargs):
+    def __init__(self, head=50, actress=None, *args, **kwargs):
         self.opt_head = head
+        self.opt_actress = actress
         super().__init__(*args, **kwargs)
 
     def connect_to_db(self):
@@ -54,9 +55,29 @@ class MovieSpider(scrapy.Spider):
         cur.close()
         return [x[0] for x in rows]
 
+    def fetch_actress_avno(self):
+        cur = self.conn.cursor()
+        cur.execute("""
+            SELECT avno FROM portfolio, (
+                SELECT name FROM actress
+                WHERE name LIKE %s
+                ORDER BY rank ASC
+            ) as actress
+            WHERE
+                portfolio.actress = actress.name
+                AND NOT EXISTS (
+                    SELECT 1 FROM movie 
+                    WHERE movie.avno = portfolio.avno
+                )
+            ORDER BY date DESC
+        """, ['%' + self.opt_actress + '%'])
+        rows = cur.fetchall()
+        cur.close()
+        return [x[0] for x in rows]
+
     def start_requests(self):
         self.connect_to_db()
-        for avno in self.fetch_head_avno():
+        for avno in self.fetch_head_avno() if self.opt_actress is None else self.fetch_actress_avno():
             yield scrapy.Request(url=self.url + avno, callback=self.parse, cb_kwargs=dict(avno=avno))
 
     def parse(self, response, avno):

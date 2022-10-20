@@ -14,8 +14,9 @@ class PortfolioSpider(scrapy.Spider):
     """
     name = 'portfolio'
 
-    def __init__(self, head=50, *args, **kwargs):
+    def __init__(self, head=50, actress=None, *args, **kwargs):
         self.opt_head = head
+        self.opt_actress = actress
         super().__init__(*args, **kwargs)
 
     def connect_to_db(self):
@@ -45,10 +46,20 @@ class PortfolioSpider(scrapy.Spider):
         cur.close()
         return star_hrefs
 
+    def fetch_star_href(self):
+        cur = self.conn.cursor()
+        cur.execute("""
+            SELECT name, javbus_href FROM actress
+            WHERE name LIKE %s
+            ORDER BY rank ASC
+        """, ['%' + self.opt_actress + '%'])
+        star_hrefs = cur.fetchall()
+        cur.close()
+        return star_hrefs
+
     def start_requests(self):
         self.connect_to_db()
-
-        for star, href in self.fetch_head_star_hrefs():
+        for star, href in self.fetch_head_star_hrefs() if self.opt_actress is None else self.fetch_star_href():
             yield scrapy.Request(url=href, callback=self.parse, cb_kwargs=dict(star=star, page=1))
 
     def parse(self, response, star, page):
