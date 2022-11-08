@@ -2,8 +2,6 @@ version: '3'
 
 services:
   hacg:
-    environment:
-      - MONGO_URI=mongodb://host.docker.internal:27017
     container_name: hacg
     build:
       context: .

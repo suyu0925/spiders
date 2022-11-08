@@ -1,3 +1,5 @@
 scrapy
-pymongo
 schedule
+loguru
+psycopg2-binary
+python-dotenv

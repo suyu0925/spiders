@@ -1,7 +1,9 @@
 import json
+from urllib.parse import urlparse
 
-import pymongo
+import psycopg2
 from itemadapter import ItemAdapter
+from hacg.items import ArticleItem
 
 
 class JsonWriterPipeline:
@@ -19,34 +21,69 @@ class JsonWriterPipeline:
         return item
 
 
-class MongoPipeline:
-    collection_name = 'article'
-
-    def __init__(self, mongo_uri, mongo_db):
-        self.mongo_uri = mongo_uri
-        self.mongo_db = mongo_db
+class PgsqlPipeline:
+    conn = None
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI'),
-            mongo_db=crawler.settings.get('MONGO_DATABASE'),
+            pg_uri=crawler.settings.get('PG_URI')
         )
 
-    def open_spider(self, spider):
-        self.client = pymongo.MongoClient(self.mongo_uri)
-        self.db = self.client[self.mongo_db]
-        self.db[self.collection_name].create_index('id', background=True)
-        self.db[self.collection_name].create_index([('update_time', pymongo.DESCENDING)], background=True)
-        self.db[self.collection_name].create_index('title', background=True)
-
-    def close_spider(self, spider):
-        self.client.close()
+    def __init__(self, pg_uri):
+        result = urlparse(pg_uri)
+        username = result.username
+        password = result.password
+        database = result.path[1:]
+        hostname = result.hostname
+        port = 5432 if result.port is None else result.port
+        self.conn = psycopg2.connect(
+            database=database,
+            user=username,
+            password=password,
+            host=hostname,
+            port=port,
+        )
+        cur = self.conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS article(
+                id              text        NOT NULL,
+                title           text        NOT NULL,
+                content         text        NOT NULL,
+                update_time     timestamp   NOT NULL,
+                href            text        NOT NULL,
+                magnet          text        NOT NULL,
+                CONSTRAINT article_pk PRIMARY KEY (id)
+            );
+            CREATE INDEX IF NOT EXISTS article_update_time_index ON article (update_time);
+        """)
+        cur.close()
+        self.conn.commit()
 
     def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
-        self.db[self.collection_name].update_one(
-            {'id': adapter['id']},
-            {'$set': adapter.asdict()},
-            upsert=True)
+        try:
+            cur = self.conn.cursor()
+            if isinstance(item, ArticleItem):
+                cur.execute(f"""
+                    INSERT INTO article(id, title, content, update_time, href, magnet)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT
+                        ON CONSTRAINT article_pk
+                        DO UPDATE SET
+                            title = %s,
+                            content = %s,
+                            update_time = %s,
+                            href = %s,
+                            magnet = %s
+                    ;
+                """, (
+                    item["id"], item["title"], item["content"], item["update_time"], item["href"], item["magnet"],
+                    item["title"], item["content"], item["update_time"], item["href"], item["magnet"],
+                ))
+        except psycopg2.Error as e:
+            print(f"psycopg2 raise error {e}")
+            self.conn.rollback()
+        else:
+            cur.close()
+            self.conn.commit()
         return item
