@@ -10,7 +10,7 @@ class AnimeSpider(scrapy.Spider):
     name = 'anime'
 
     def start_requests(self):
-        yield scrapy.Request("https://www.hacg.mom/wp/anime.html", self.parse)
+        yield scrapy.Request(self.settings.get('HACG_ANIME_URL'), self.parse)
 
     def parse(self, response):
         os.makedirs('tmp', exist_ok=True)

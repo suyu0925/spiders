@@ -14,3 +14,5 @@ ITEM_PIPELINES = {
 }
 
 PG_URI = os.environ['PG_URI']
+
+HACG_ANIME_URL = "https://www.hacg.lv/wp/anime.html"
